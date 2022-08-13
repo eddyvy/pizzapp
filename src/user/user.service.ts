@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -49,10 +45,31 @@ export class UserService {
     }))
   }
 
-  async findOne(id: string): Promise<GetUserDto> {
+  async findOne(id: string): Promise<GetUserDto | null> {
     const userFound = await this.userModel.findById(id)
 
-    if (!userFound) throw new NotFoundException()
+    if (!userFound) return null
+
+    return {
+      id: userFound._id,
+      name: userFound.name,
+      email: userFound.email,
+      role: userFound.role,
+    }
+  }
+
+  async findByEmailAndPassword(
+    email: string,
+    password: string,
+  ): Promise<GetUserDto | null> {
+    const hash = SHA256(this.config.get('HASH_SALT') + password).toString()
+
+    const userFound = await this.userModel.findOne({
+      email,
+      hash,
+    })
+
+    if (!userFound) return null
 
     return {
       id: userFound._id,
@@ -65,11 +82,10 @@ export class UserService {
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
-  ): Promise<{ success: boolean }> {
+  ): Promise<{ success: boolean } | null> {
     const userToUpdate = await this.userModel.findById(id)
 
-    if (!userToUpdate)
-      throw new UnprocessableEntityException('User does not exist')
+    if (!userToUpdate) return null
 
     const { acknowledged } = await this.userModel.updateOne(
       { _id: userToUpdate._id },
@@ -81,11 +97,10 @@ export class UserService {
     }
   }
 
-  async remove(id: string): Promise<{ success: boolean }> {
+  async remove(id: string): Promise<{ success: boolean } | null> {
     const userToRemove = await this.userModel.findById(id)
 
-    if (!userToRemove)
-      throw new UnprocessableEntityException('User does not exist')
+    if (!userToRemove) return null
 
     const { acknowledged } = await this.userModel.deleteOne({
       _id: userToRemove._id,

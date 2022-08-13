@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common'
 import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user.dto'
@@ -27,16 +29,28 @@ export class UserController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.userService.findOne(id)
+    const user = await this.userService.findOne(id)
+
+    if (!user) throw new NotFoundException()
+
+    return user
   }
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return await this.userService.update(id, updateUserDto)
+    const updated = await this.userService.update(id, updateUserDto)
+
+    if (!updated) throw new UnprocessableEntityException('User does not exist')
+
+    return updated
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return await this.userService.remove(id)
+    const deleted = await this.userService.remove(id)
+
+    if (!deleted) throw new UnprocessableEntityException('User does not exist')
+
+    return deleted
   }
 }
