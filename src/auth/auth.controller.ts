@@ -12,6 +12,8 @@ export class AuthController {
 
     if (!user) throw new UnauthorizedException('Invalid email or password')
 
-    return user
+    const token = this.authService.signToken(user)
+
+    return { token }
   }
 }

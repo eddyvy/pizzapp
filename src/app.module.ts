@@ -15,11 +15,11 @@ import { UserModule } from './user/user.module'
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get('MONGO_HOST'),
-        dbName: configService.get('MONGO_INITDB_DATABASE'),
-        user: configService.get('MONGO_INITDB_ROOT_USERNAME'),
-        pass: configService.get('MONGO_INITDB_ROOT_PASSWORD'),
+      useFactory: async (config: ConfigService) => ({
+        uri: config.get('MONGO_HOST'),
+        dbName: config.get('MONGO_INITDB_DATABASE'),
+        user: config.get('MONGO_INITDB_ROOT_USERNAME'),
+        pass: config.get('MONGO_INITDB_ROOT_PASSWORD'),
       }),
     }),
     UserModule,

@@ -1,6 +1,6 @@
 import { UserRole } from '../enum/user-role.enum'
 
-export class GetUserDto {
+export type UserType = {
   id: string
   name: string
   email: string

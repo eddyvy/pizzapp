@@ -3,8 +3,9 @@ import { ConfigService } from '@nestjs/config'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { SHA256 } from 'crypto-js'
-import { CreateUserDto, GetUserDto, UpdateUserDto } from './dto'
+import { CreateUserDto, UpdateUserDto } from './dto'
 import { User, UserDocument } from './schema/user.schema'
+import { UserType } from './types/user.types'
 
 @Injectable()
 export class UserService {
@@ -13,9 +14,9 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<GetUserDto> {
+  async create(createUserDto: CreateUserDto): Promise<UserType> {
     const hash = SHA256(
-      this.config.get('HASH_SALT') + createUserDto.password,
+      this.config.getOrThrow('HASH_SALT') + createUserDto.password,
     ).toString()
 
     const createdUser = new this.userModel({
@@ -35,7 +36,7 @@ export class UserService {
     }
   }
 
-  async findAll(): Promise<GetUserDto[]> {
+  async findAll(): Promise<UserType[]> {
     const usersFound = await this.userModel.find().exec()
     return usersFound.map(({ _id, name, email, role }) => ({
       id: _id,
@@ -45,7 +46,7 @@ export class UserService {
     }))
   }
 
-  async findOne(id: string): Promise<GetUserDto | null> {
+  async findOne(id: string): Promise<UserType | null> {
     const userFound = await this.userModel.findById(id)
 
     if (!userFound) return null
@@ -61,8 +62,10 @@ export class UserService {
   async findByEmailAndPassword(
     email: string,
     password: string,
-  ): Promise<GetUserDto | null> {
-    const hash = SHA256(this.config.get('HASH_SALT') + password).toString()
+  ): Promise<UserType | null> {
+    const hash = SHA256(
+      this.config.getOrThrow('HASH_SALT') + password,
+    ).toString()
 
     const userFound = await this.userModel.findOne({
       email,
