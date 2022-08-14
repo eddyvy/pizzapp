@@ -18,10 +18,15 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "start:db": "docker-compose up -d mongodb",
-    "stop:db": "docker-compose stop mongodb",
-    "fixtures": "env-cmd ts-node ./fixtures/mongodb-fixtures.ts"
+    "test:e2e": "env-cmd -f .env.test jest --watch --no-cache --config ./test/jest-e2e.json",
+    "up:db": "env-cmd -f .env docker compose up mongodb -d",
+    "stop:db": "env-cmd -f .env docker compose stop mongodb",
+    "rm:db": "env-cmd -f .env docker compose rm mongodb -s -f -v",
+    "restart:db": "env-cmd -f .env yarn rm:db && yarn up:db",
+    "up:db:test": "env-cmd -f .env.test docker compose up test-mongodb -d",
+    "stop:db:test": "env-cmd -f .env.test docker compose stop test-mongodb",
+    "rm:db:test": "env-cmd -f .env.test docker compose rm test-mongodb -s -f -v",
+    "restart:db:test": "yarn rm:db:test && yarn up:db:test"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",

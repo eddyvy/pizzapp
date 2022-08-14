@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { INestApplication } from '@nestjs/common'
+import { INestApplication, ValidationPipe } from '@nestjs/common'
 import * as request from 'supertest'
-import { AppModule } from './../src/app.module'
+import { AppModule } from '../src/app.module'
+import { ConfigModule } from '@nestjs/config'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
@@ -9,10 +10,26 @@ describe('AppController (e2e)', () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile()
-
+    })
+      .overrideProvider(ConfigModule)
+      .useValue(
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: '.env.test',
+        }),
+      )
+      .compile()
     app = moduleFixture.createNestApplication()
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+      }),
+    )
     await app.init()
+  })
+
+  afterEach(async () => {
+    await app.close()
   })
 
   it('/ (GET)', () => {
