@@ -14,6 +14,15 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
+  private mapUser(us: UserDocument): UserType {
+    return {
+      id: us._id.toString(),
+      name: us.name,
+      email: us.email,
+      role: us.role,
+    }
+  }
+
   async create(createUserDto: CreateUserDto): Promise<UserType> {
     const hash = SHA256(
       this.config.getOrThrow('HASH_SALT') + createUserDto.password,
@@ -26,37 +35,20 @@ export class UserService {
       role: createUserDto.role,
     })
 
-    const { _id, name, email, role } = await createdUser.save()
+    const user = await createdUser.save()
 
-    return {
-      id: _id.toString(),
-      name,
-      email,
-      role,
-    }
+    return this.mapUser(user)
   }
 
   async findAll(): Promise<UserType[]> {
-    const usersFound = await this.userModel.find().exec()
-    return usersFound.map(({ _id, name, email, role }) => ({
-      id: _id.toString(),
-      name,
-      email,
-      role,
-    }))
+    const users = await this.userModel.find().exec()
+    return users.map(this.mapUser)
   }
 
   async findOne(id: string): Promise<UserType | null> {
-    const userFound = await this.userModel.findById(id)
-
-    if (!userFound) return null
-
-    return {
-      id: userFound._id.toString(),
-      name: userFound.name,
-      email: userFound.email,
-      role: userFound.role,
-    }
+    const user = await this.userModel.findById(id)
+    if (!user) return null
+    return this.mapUser(user)
   }
 
   async findByEmailAndPassword(
@@ -67,31 +59,25 @@ export class UserService {
       this.config.getOrThrow('HASH_SALT') + password,
     ).toString()
 
-    const userFound = await this.userModel.findOne({
+    const user = await this.userModel.findOne({
       email,
       hash,
     })
 
-    if (!userFound) return null
-
-    return {
-      id: userFound._id.toString(),
-      name: userFound.name,
-      email: userFound.email,
-      role: userFound.role,
-    }
+    if (!user) return null
+    return this.mapUser(user)
   }
 
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<{ success: boolean } | null> {
-    const userToUpdate = await this.userModel.findById(id)
+    const user = await this.userModel.findById(id)
 
-    if (!userToUpdate) return null
+    if (!user) return null
 
     const { acknowledged } = await this.userModel.updateOne(
-      { _id: userToUpdate._id },
+      { _id: user._id },
       updateUserDto,
     )
 
@@ -101,12 +87,12 @@ export class UserService {
   }
 
   async remove(id: string): Promise<{ success: boolean } | null> {
-    const userToRemove = await this.userModel.findById(id)
+    const user = await this.userModel.findById(id)
 
-    if (!userToRemove) return null
+    if (!user) return null
 
     const { acknowledged } = await this.userModel.deleteOne({
-      _id: userToRemove._id,
+      _id: user._id,
     })
 
     return {
