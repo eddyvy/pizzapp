@@ -7,6 +7,7 @@ import { AllExceptionsFilter } from './app.filter'
 import { AppService } from './app.service'
 import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module'
+import { IngredientModule } from './ingredient/ingredient.module'
 
 @Module({
   imports: [
@@ -22,10 +23,11 @@ import { UserModule } from './user/user.module'
         dbName: config.get('MONGO_INITDB_DATABASE'),
         user: config.get('MONGO_INITDB_ROOT_USERNAME'),
         pass: config.get('MONGO_INITDB_ROOT_PASSWORD'),
-        retryAttempts: 1,
+        retryAttempts: 2,
       }),
     }),
     UserModule,
+    IngredientModule,
   ],
   controllers: [AppController],
   providers: [
