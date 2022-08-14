@@ -39,7 +39,7 @@ export class UserService {
   async findAll(): Promise<UserType[]> {
     const usersFound = await this.userModel.find().exec()
     return usersFound.map(({ _id, name, email, role }) => ({
-      id: _id,
+      id: _id.toString(),
       name,
       email,
       role,

@@ -10,36 +10,35 @@ import {
   UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common'
-import { UserService } from './user.service'
-import { CreateUserDto } from './dto/create-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
-import { JwtGuard } from '../auth/guard/jwt.guard'
-import { JwtPayload } from '../auth/decorator/jwt.decorator'
 import { JwtPayloadType } from '../auth/types/jwt.types'
+import { JwtGuard, RolesGuard } from '../auth/guard'
+import { JwtPayload, Roles } from '../auth/decorator'
+import { CreateUserDto, UpdateUserDto } from './dto'
+import { UserService } from './user.service'
 
+@UseGuards(JwtGuard, RolesGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(JwtGuard)
+  @Roles('admin')
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.userService.create(createUserDto)
   }
 
-  @UseGuards(JwtGuard)
   @Get('/me')
   async findMe(@JwtPayload() payload: JwtPayloadType) {
-    return { payload }
+    return await this.userService.findOne(payload.id)
   }
 
-  @UseGuards(JwtGuard)
+  @Roles('admin')
   @Get()
   async findAll() {
     return await this.userService.findAll()
   }
 
-  @UseGuards(JwtGuard)
+  @Roles('admin')
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const user = await this.userService.findOne(id)
@@ -49,7 +48,7 @@ export class UserController {
     return user
   }
 
-  @UseGuards(JwtGuard)
+  @Roles('admin')
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const updated = await this.userService.update(id, updateUserDto)
@@ -59,7 +58,7 @@ export class UserController {
     return updated
   }
 
-  @UseGuards(JwtGuard)
+  @Roles('admin')
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const deleted = await this.userService.remove(id)
