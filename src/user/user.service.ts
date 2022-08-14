@@ -52,7 +52,7 @@ export class UserService {
     if (!userFound) return null
 
     return {
-      id: userFound._id,
+      id: userFound._id.toString(),
       name: userFound.name,
       email: userFound.email,
       role: userFound.role,
@@ -75,7 +75,7 @@ export class UserService {
     if (!userFound) return null
 
     return {
-      id: userFound._id,
+      id: userFound._id.toString(),
       name: userFound.name,
       email: userFound.email,
       role: userFound.role,
