@@ -9,6 +9,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common'
 import { JwtPayloadType } from '../auth/types/jwt.types'
 import { JwtGuard, RolesGuard } from '../auth/guard'
@@ -28,7 +29,7 @@ export class UserController {
     return await this.userService.create(createUserDto)
   }
 
-  @Get('/me')
+  @Get('me')
   async findMe(@JwtPayload() payload: JwtPayloadType) {
     return await this.userService.findOne(payload.id)
   }
@@ -55,6 +56,14 @@ export class UserController {
     @Param('id', ParseToValidIdString) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
+    if (
+      !updateUserDto ||
+      Array.isArray(updateUserDto) ||
+      typeof updateUserDto !== 'object' ||
+      Object.keys(updateUserDto).length === 0
+    )
+      throw new BadRequestException()
+
     const updated = await this.userService.update(id, updateUserDto)
 
     if (!updated) throw new UnprocessableEntityException('User does not exist')

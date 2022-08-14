@@ -1,6 +1,5 @@
 import * as request from 'supertest'
-import { getModuleFixture } from './helper/getModuleFixture'
-import { initApp } from './helper/initApp'
+import { getModuleFixture, initApp } from './helper'
 
 describe('AppController (e2e)', () => {
   test('GET /', async () => {

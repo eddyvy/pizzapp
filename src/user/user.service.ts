@@ -29,7 +29,7 @@ export class UserService {
     const { _id, name, email, role } = await createdUser.save()
 
     return {
-      id: _id,
+      id: _id.toString(),
       name,
       email,
       role,
@@ -109,6 +109,13 @@ export class UserService {
       _id: userToRemove._id,
     })
 
+    return {
+      success: acknowledged,
+    }
+  }
+
+  async removeAll(): Promise<{ success: boolean } | null> {
+    const { acknowledged } = await this.userModel.deleteMany()
     return {
       success: acknowledged,
     }
