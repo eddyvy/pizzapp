@@ -41,7 +41,7 @@ describe('AppController (e2e)', () => {
         expect(token).toEqual(expect.any(String))
 
         const jwt = new JwtService()
-        const { user } = jwt.verify(token, {
+        const user = jwt.verify(token, {
           publicKey: process.env.PUBLIC_KEY,
           algorithms: ['RS256'],
         })
