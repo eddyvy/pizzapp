@@ -20,6 +20,6 @@ export class AuthService {
   }
 
   signToken(user: UserType): string {
-    return this.jwt.sign({ user })
+    return this.jwt.sign(user)
   }
 }

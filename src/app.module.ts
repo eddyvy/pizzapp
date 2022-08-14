@@ -20,6 +20,7 @@ import { UserModule } from './user/user.module'
         dbName: config.get('MONGO_INITDB_DATABASE'),
         user: config.get('MONGO_INITDB_ROOT_USERNAME'),
         pass: config.get('MONGO_INITDB_ROOT_PASSWORD'),
+        retryAttempts: 1,
       }),
     }),
     UserModule,
