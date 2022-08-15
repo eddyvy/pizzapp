@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module'
 import { IngredientModule } from './ingredient/ingredient.module'
 import { PizzaSizeModule } from './pizza-size/pizza-size.module'
+import { PizzaModule } from './pizza/pizza.module'
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PizzaSizeModule } from './pizza-size/pizza-size.module'
     UserModule,
     IngredientModule,
     PizzaSizeModule,
+    PizzaModule,
   ],
   controllers: [AppController],
   providers: [

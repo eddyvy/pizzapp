@@ -54,6 +54,14 @@ export class IngredientService {
     return this.mapIngredient(ing)
   }
 
+  async findByNameAsDb(nameToFind: string): Promise<IngredientDocument | null> {
+    const ing = await this.ingredientModel.findOne({
+      name: nameToFind,
+    })
+    if (!ing) return null
+    return ing
+  }
+
   async update(
     id: string,
     updateIngredientDto: UpdateIngredientDto,
