@@ -36,7 +36,7 @@ export class PizzaService {
           const ingFromDb = await this.ingredientService.findByNameAsDb(ing)
           if (!ingFromDb && throwIfMissingSomething)
             throw new UnprocessableEntityException(
-              `It seems you've tried to create a pizza with ${ing}... sounds weird for us!`,
+              `It seems you've tried to use ${ing} as ingredient... sounds weird for us!`,
             )
           return ingFromDb
         }),

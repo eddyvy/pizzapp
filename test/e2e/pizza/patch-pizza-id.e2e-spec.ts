@@ -245,7 +245,7 @@ describe('PATCH /pizzas/:id', () => {
       .expect({
         statusCode: 422,
         message:
-          "It seems you've tried to create a pizza with stone... sounds weird for us!",
+          "It seems you've tried to use stone as ingredient... sounds weird for us!",
         error: 'Unprocessable Entity',
       })
   })

@@ -134,6 +134,24 @@ describe('POST /pizzas', () => {
       })
   })
 
+  test('should return 401 if invalid credentials', async () => {
+    const now = Date.now().valueOf()
+
+    await request(app.getHttpServer())
+      .post(url)
+      .set('Authorization', `Bearer wrong`)
+      .send({
+        name: `pizza${now}`,
+        basicPrice: 12,
+        ingredients: ['tomato', 'cheese'],
+      })
+      .expect(401)
+      .expect({
+        statusCode: 401,
+        message: 'Unauthorized',
+      })
+  })
+
   test('should return 403 if is not an admin user', async () => {
     const now = Date.now().valueOf()
     const me: UserType = await userService.findByEmailAndPassword(
@@ -208,7 +226,7 @@ describe('POST /pizzas', () => {
       .expect({
         statusCode: 422,
         message:
-          "It seems you've tried to create a pizza with stone... sounds weird for us!",
+          "It seems you've tried to use stone as ingredient... sounds weird for us!",
         error: 'Unprocessable Entity',
       })
   })
