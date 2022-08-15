@@ -219,7 +219,7 @@ describe('POST /ingredients', () => {
       })
   })
 
-  test('should return 409 if the email already exists', async () => {
+  test('should return 409 if the ingredient already exists', async () => {
     const now = Date.now().valueOf()
     const me: UserType = await userService.findByEmailAndPassword(
       adminUser.email,

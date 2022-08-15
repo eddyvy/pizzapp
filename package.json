@@ -22,8 +22,9 @@
     "stop:db:test": "env-cmd -f .test.env docker compose stop test-mongodb",
     "rm:db:test": "env-cmd -f .test.env docker compose rm test-mongodb -s -f -v",
     "restart:db:test": "yarn rm:db:test && yarn up:db:test",
+    "test:e2e:once": "env-cmd -f .test.env jest --verbose --no-cache --config ./test/jest-e2e.json --maxWorkers=1",
     "test:e2e": "env-cmd -f .test.env jest --watch --no-cache --config ./test/jest-e2e.json --maxWorkers=1",
-    "test": "yarn restart:db:test && sleep 1 && yarn test:e2e && yarn rm:db:test",
+    "test": "yarn restart:db:test && sleep 1 && yarn test:e2e:once && yarn rm:db:test",
     "test:watch": "yarn test:e2e --watch",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },

@@ -1,8 +1,9 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { ObjectId } from 'bson'
-import { adminUser, notAdminUser } from '../../data'
+import { adminUser, notAdminUser, testDataIngredients } from '../../data'
 import {
+  chekOrCreateIngredients,
   checkOrCreateUser,
   createToken,
   getModuleFixture,
@@ -11,23 +12,23 @@ import {
 import { UserType } from '../../../src/user/types/user.types'
 import { UserModule } from '../../../src/user/user.module'
 import { UserService } from '../../../src/user/user.service'
-import { PizzaSizeModule } from '../../../src/pizza-size/pizza-size.module'
-import { PizzaSizeService } from '../../../src/pizza-size/pizza-size.service'
+import { PizzaModule } from '../../../src/pizza/pizza.module'
+import { PizzaService } from '../../../src/pizza/pizza.service'
 
-describe('DELETE /sizes/:id', () => {
-  const url = '/sizes'
+describe('DELETE /pizzas/:id', () => {
+  const url = '/pizzas'
   let app: INestApplication
   let userService: UserService
-  let pizzaSizeService: PizzaSizeService
+  let pizzaService: PizzaService
 
   beforeAll(async () => {
     const moduleFixture = await getModuleFixture()
+
     await checkOrCreateUser(moduleFixture, adminUser)
     await checkOrCreateUser(moduleFixture, notAdminUser)
+    await chekOrCreateIngredients(moduleFixture, testDataIngredients)
 
-    pizzaSizeService = moduleFixture
-      .select(PizzaSizeModule)
-      .get(PizzaSizeService)
+    pizzaService = moduleFixture.select(PizzaModule).get(PizzaService)
     userService = moduleFixture.select(UserModule).get(UserService)
     app = await initApp(moduleFixture)
   })
@@ -44,25 +45,22 @@ describe('DELETE /sizes/:id', () => {
     )
     const myToken = createToken(me)
 
-    const pizzaSizeToDelete = await pizzaSizeService.create({
-      name: `pizzaSize${now}`,
-      centimeters: now,
-      priceIncPct: 25,
+    const pizzaToDelete = await pizzaService.create({
+      name: `pizza${now}`,
+      basicPrice: 12,
+      ingredients: ['tomato', 'cheese'],
     })
 
     await request(app.getHttpServer())
-      .delete(`${url}/${pizzaSizeToDelete.id}`)
+      .delete(`${url}/${pizzaToDelete.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .expect(200)
       .expect({
         success: true,
       })
 
-    const deletedPizzaSize = await pizzaSizeService.findOne(
-      pizzaSizeToDelete.id,
-    )
-
-    expect(deletedPizzaSize).toBeNull()
+    const deletedpizza = await pizzaService.findOne(pizzaToDelete.id)
+    expect(deletedpizza).toBeNull()
   })
 
   test('should return 400 with with wrong id param', async () => {
@@ -91,14 +89,14 @@ describe('DELETE /sizes/:id', () => {
     )
     const myToken = createToken(me)
 
-    const pizzaSizeToDelete = await pizzaSizeService.create({
-      name: `pizzaSize${now}`,
-      centimeters: now,
-      priceIncPct: 25,
+    const pizzaToDelete = await pizzaService.create({
+      name: `pizza${now}`,
+      basicPrice: 12,
+      ingredients: ['tomato', 'cheese'],
     })
 
     await request(app.getHttpServer())
-      .delete(`${url}/${pizzaSizeToDelete.id}`)
+      .delete(`${url}/${pizzaToDelete.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .expect(403)
       .expect({
@@ -108,7 +106,7 @@ describe('DELETE /sizes/:id', () => {
       })
   })
 
-  test('should return 422 if the pizza size does not exist', async () => {
+  test('should return 422 if the pizza does not exist', async () => {
     const me: UserType = await userService.findByEmailAndPassword(
       adminUser.email,
       adminUser.password,
@@ -123,7 +121,7 @@ describe('DELETE /sizes/:id', () => {
       .expect(422)
       .expect({
         statusCode: 422,
-        message: 'Pizza size does not exist',
+        message: 'Pizza does not exist',
         error: 'Unprocessable Entity',
       })
   })

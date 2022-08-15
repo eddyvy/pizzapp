@@ -12,6 +12,7 @@ import {
   Query,
   ParseArrayPipe,
   DefaultValuePipe,
+  BadRequestException,
 } from '@nestjs/common'
 import { JwtGuard, RolesGuard } from '../auth/guard'
 import { Roles } from '../auth/decorator'
@@ -57,6 +58,14 @@ export class PizzaController {
     @Param('id', ParseToValidIdStringPipe) id: string,
     @Body() updatePizzaDto: UpdatePizzaDto,
   ) {
+    if (
+      !updatePizzaDto ||
+      Array.isArray(updatePizzaDto) ||
+      typeof updatePizzaDto !== 'object' ||
+      Object.keys(updatePizzaDto).length === 0
+    )
+      throw new BadRequestException()
+
     if (updatePizzaDto.ingredients.length === 0) throw new TastelessException()
 
     const updated = await this.pizzaService.update(id, updatePizzaDto)

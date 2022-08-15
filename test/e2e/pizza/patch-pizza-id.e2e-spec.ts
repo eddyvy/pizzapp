@@ -1,8 +1,9 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { ObjectId } from 'bson'
-import { adminUser, notAdminUser } from '../../data'
+import { adminUser, notAdminUser, testDataIngredients } from '../../data'
 import {
+  chekOrCreateIngredients,
   checkOrCreateUser,
   createToken,
   getModuleFixture,
@@ -11,23 +12,23 @@ import {
 import { UserType } from '../../../src/user/types/user.types'
 import { UserModule } from '../../../src/user/user.module'
 import { UserService } from '../../../src/user/user.service'
-import { IngredientModule } from '../../../src/ingredient/ingredient.module'
-import { IngredientService } from '../../../src/ingredient/ingredient.service'
+import { PizzaModule } from '../../../src/pizza/pizza.module'
+import { PizzaService } from '../../../src/pizza/pizza.service'
 
-describe('PATCH /ingredients/:id', () => {
-  const url = '/ingredients'
+describe('PATCH /pizzas/:id', () => {
+  const url = '/pizzas'
   let app: INestApplication
   let userService: UserService
-  let ingredientService: IngredientService
+  let pizzaService: PizzaService
 
   beforeAll(async () => {
     const moduleFixture = await getModuleFixture()
+
     await checkOrCreateUser(moduleFixture, adminUser)
     await checkOrCreateUser(moduleFixture, notAdminUser)
+    await chekOrCreateIngredients(moduleFixture, testDataIngredients)
 
-    ingredientService = moduleFixture
-      .select(IngredientModule)
-      .get(IngredientService)
+    pizzaService = moduleFixture.select(PizzaModule).get(PizzaService)
     userService = moduleFixture.select(UserModule).get(UserService)
     app = await initApp(moduleFixture)
   })
@@ -44,46 +45,31 @@ describe('PATCH /ingredients/:id', () => {
     )
     const myToken = createToken(me)
 
-    const ingredientToUpdate = await ingredientService.create({
-      name: `ingredient${now}`,
-      isGlutenFree: true,
-      isNutFree: true,
-      isLactoseFree: true,
-      isFishFree: true,
-      isVegetarian: true,
-      isVegan: true,
-      spicyLevel: 0,
-      extraPrice: 1.5,
+    const pizzaToUpdate = await pizzaService.create({
+      name: `pizza${now}`,
+      basicPrice: 12,
+      ingredients: ['tomato', 'cheese'],
     })
 
     await request(app.getHttpServer())
-      .patch(`${url}/${ingredientToUpdate.id}`)
+      .patch(`${url}/${pizzaToUpdate.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .send({
-        isNutFree: false,
-        isLactoseFree: false,
-        spicyLevel: 2,
+        basicPrice: 15,
+        ingredients: ['tomato', 'cheese', 'ham'],
       })
       .expect(200)
       .expect({
         success: true,
       })
 
-    const updatedIngredient = await ingredientService.findOne(
-      ingredientToUpdate.id,
-    )
+    const updatedpizza = await pizzaService.findOne(pizzaToUpdate.id)
 
-    expect(updatedIngredient).toMatchObject({
+    expect(updatedpizza).toMatchObject({
       id: expect.any(String),
-      name: `ingredient${now}`,
-      isGlutenFree: true,
-      isNutFree: false,
-      isLactoseFree: false,
-      isFishFree: true,
-      isVegetarian: true,
-      isVegan: true,
-      spicyLevel: 2,
-      extraPrice: 1.5,
+      name: `pizza${now}`,
+      basicPrice: 15,
+      ingredients: ['tomato', 'cheese', 'ham'],
     })
   })
 
@@ -98,9 +84,8 @@ describe('PATCH /ingredients/:id', () => {
       .patch(`${url}/wrong`)
       .set('Authorization', `Bearer ${myToken}`)
       .send({
-        isNutFree: false,
-        isLactoseFree: false,
-        spicyLevel: 2,
+        basicPrice: 12,
+        ingredients: ['tomato', 'cheese'],
       })
       .expect(400)
       .expect({
@@ -118,38 +103,33 @@ describe('PATCH /ingredients/:id', () => {
     )
     const myToken = createToken(me)
 
-    const ingredientToUpdate = await ingredientService.create({
-      name: `ingredient${now}`,
-      isGlutenFree: true,
-      isNutFree: true,
-      isLactoseFree: true,
-      isFishFree: true,
-      isVegetarian: true,
-      isVegan: true,
-      spicyLevel: 0,
-      extraPrice: 1.5,
+    const pizzaToUpdate = await pizzaService.create({
+      name: `pizza${now}`,
+      basicPrice: 12,
+      ingredients: ['tomato', 'cheese'],
     })
 
     await request(app.getHttpServer())
-      .patch(`${url}/${ingredientToUpdate.id}`)
+      .patch(`${url}/${pizzaToUpdate.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .send({
-        isNutFree: 14323344,
-        isLactoseFree: 'wrong',
-        spicyLevel: 2,
+        name: 123,
+        basicPrice: ['wrong'],
+        ingredients: 'unknown',
       })
       .expect(400)
       .expect({
         statusCode: 400,
         message: [
-          'isNutFree must be a boolean value',
-          'isLactoseFree must be a boolean value',
+          'name must be a string',
+          'ingredients must be an array',
+          'basicPrice must be a number conforming to the specified constraints',
         ],
         error: 'Bad Request',
       })
 
     await request(app.getHttpServer())
-      .patch(`${url}/${ingredientToUpdate.id}`)
+      .patch(`${url}/${pizzaToUpdate.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .expect(400)
       .expect({
@@ -158,7 +138,7 @@ describe('PATCH /ingredients/:id', () => {
       })
   })
 
-  test('should return 400 with insecure or invalid spicy level', async () => {
+  test('should return 400 with a tasteless pizza! (ingredients empty array)', async () => {
     const now = Date.now().valueOf()
     const me: UserType = await userService.findByEmailAndPassword(
       adminUser.email,
@@ -166,45 +146,23 @@ describe('PATCH /ingredients/:id', () => {
     )
     const myToken = createToken(me)
 
-    const ingredientToUpdate = await ingredientService.create({
-      name: `ingredient${now}`,
-      isGlutenFree: true,
-      isNutFree: true,
-      isLactoseFree: true,
-      isFishFree: true,
-      isVegetarian: true,
-      isVegan: true,
-      spicyLevel: 0,
-      extraPrice: 1.5,
+    const pizzaToUpdate = await pizzaService.create({
+      name: `pizza${now}`,
+      basicPrice: 12,
+      ingredients: ['tomato', 'cheese'],
     })
 
     await request(app.getHttpServer())
-      .patch(`${url}/${ingredientToUpdate.id}`)
+      .patch(`${url}/${pizzaToUpdate.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .send({
-        isNutFree: true,
-        isLactoseFree: false,
-        spicyLevel: 500,
+        basicPrice: 15,
+        ingredients: [],
       })
       .expect(400)
       .expect({
         statusCode: 400,
-        message: 'Spicy level cannot be more than 5, could be so dangerous!!',
-        error: 'Bad Request',
-      })
-
-    await request(app.getHttpServer())
-      .patch(`${url}/${ingredientToUpdate.id}`)
-      .set('Authorization', `Bearer ${myToken}`)
-      .send({
-        isNutFree: true,
-        isLactoseFree: false,
-        spicyLevel: -23,
-      })
-      .expect(400)
-      .expect({
-        statusCode: 400,
-        message: 'Spicy level cannot be less than 0',
+        message: 'Your pizza without ingredients is tasteless!',
         error: 'Bad Request',
       })
   })
@@ -217,25 +175,18 @@ describe('PATCH /ingredients/:id', () => {
     )
     const myToken = createToken(me)
 
-    const ingredientToUpdate = await ingredientService.create({
-      name: `ingredient${now}`,
-      isGlutenFree: true,
-      isNutFree: true,
-      isLactoseFree: true,
-      isFishFree: true,
-      isVegetarian: true,
-      isVegan: true,
-      spicyLevel: 0,
-      extraPrice: 1.5,
+    const pizzaToUpdate = await pizzaService.create({
+      name: `pizza${now}`,
+      basicPrice: 12,
+      ingredients: ['tomato', 'cheese'],
     })
 
     await request(app.getHttpServer())
-      .patch(`${url}/${ingredientToUpdate.id}`)
+      .patch(`${url}/${pizzaToUpdate.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .send({
-        isNutFree: false,
-        isLactoseFree: false,
-        spicyLevel: 2,
+        basicPrice: 15,
+        ingredients: ['tomato', 'cheese', 'ham'],
       })
       .expect(403)
       .expect({
@@ -245,7 +196,7 @@ describe('PATCH /ingredients/:id', () => {
       })
   })
 
-  test('should return 422 if the ingredient does not exist', async () => {
+  test('should return 422 if the pizza does not exist', async () => {
     const me: UserType = await userService.findByEmailAndPassword(
       adminUser.email,
       adminUser.password,
@@ -258,19 +209,18 @@ describe('PATCH /ingredients/:id', () => {
       .patch(`${url}/${id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .send({
-        isNutFree: false,
-        isLactoseFree: false,
-        spicyLevel: 2,
+        basicPrice: 15,
+        ingredients: ['tomato', 'cheese', 'ham'],
       })
       .expect(422)
       .expect({
         statusCode: 422,
-        message: 'Ingredient does not exist',
+        message: 'Pizza does not exist',
         error: 'Unprocessable Entity',
       })
   })
 
-  test('should return 418 if you try to add pineapple', async () => {
+  test('should return 422 if ingredient does not exist', async () => {
     const now = Date.now().valueOf()
     const me: UserType = await userService.findByEmailAndPassword(
       adminUser.email,
@@ -278,30 +228,25 @@ describe('PATCH /ingredients/:id', () => {
     )
     const myToken = createToken(me)
 
-    const ingredientToUpdate = await ingredientService.create({
-      name: `ingredient${now}`,
-      isGlutenFree: true,
-      isNutFree: true,
-      isLactoseFree: true,
-      isFishFree: true,
-      isVegetarian: true,
-      isVegan: true,
-      spicyLevel: 0,
-      extraPrice: 1.5,
+    const pizzaToUpdate = await pizzaService.create({
+      name: `pizza${now}`,
+      basicPrice: 12,
+      ingredients: ['tomato', 'cheese'],
     })
 
     await request(app.getHttpServer())
-      .patch(`${url}/${ingredientToUpdate.id}`)
+      .patch(`${url}/${pizzaToUpdate.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .send({
-        name: 'pineapple',
+        basicPrice: 15,
+        ingredients: ['tomato', 'cheese', 'stone'],
       })
-      .expect(418)
+      .expect(422)
       .expect({
-        statusCode: 418,
+        statusCode: 422,
         message:
-          'Pineapples are bad, pineapples are not your friend in a pizza!',
-        error: "I'm a teapot",
+          "It seems you've tried to create a pizza with stone... sounds weird for us!",
+        error: 'Unprocessable Entity',
       })
   })
 })

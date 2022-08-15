@@ -32,7 +32,7 @@ describe('GET /ingredients', () => {
 
     await ingredientService.removeAll()
 
-    const igredientsForDb = [
+    const ingredientsForDb = [
       {
         name: `ingredient${now}1`,
         isGlutenFree: true,
@@ -57,7 +57,7 @@ describe('GET /ingredients', () => {
       },
     ]
 
-    for (const ingredientForDb of igredientsForDb) {
+    for (const ingredientForDb of ingredientsForDb) {
       await ingredientService.create(ingredientForDb)
     }
 
