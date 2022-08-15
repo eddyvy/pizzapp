@@ -16,6 +16,7 @@ import { CreateIngredientDto, UpdateIngredientDto } from './dto'
 import { IngredientService } from './ingredient.service'
 import { ParseToValidIdStringPipe } from '../mongo/pipe/objectid.validation'
 import { SpicyParseToNumberPipe } from './pipe/spicy.pipe'
+import { PinneappleException } from './exception/pineapple.exception'
 
 @Controller('ingredients')
 export class IngredientController {
@@ -27,6 +28,9 @@ export class IngredientController {
   async create(
     @Body(SpicyParseToNumberPipe) createIngredientDto: CreateIngredientDto,
   ) {
+    if (createIngredientDto.name.toLocaleLowerCase() === 'pineapple')
+      throw new PinneappleException()
+
     return await this.ingredientService.create(createIngredientDto)
   }
 
@@ -49,6 +53,9 @@ export class IngredientController {
     @Param('id', ParseToValidIdStringPipe) id: string,
     @Body(SpicyParseToNumberPipe) updateIngredientDto: UpdateIngredientDto,
   ) {
+    if (updateIngredientDto.name.toLocaleLowerCase() === 'pineapple')
+      throw new PinneappleException()
+
     const updated = await this.ingredientService.update(id, updateIngredientDto)
 
     if (!updated)

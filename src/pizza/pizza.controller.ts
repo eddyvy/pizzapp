@@ -9,7 +9,6 @@ import {
   NotFoundException,
   UnprocessableEntityException,
   UseGuards,
-  BadRequestException,
   Query,
   ParseArrayPipe,
   DefaultValuePipe,
@@ -19,6 +18,7 @@ import { Roles } from '../auth/decorator'
 import { CreatePizzaDto, UpdatePizzaDto } from './dto'
 import { PizzaService } from './pizza.service'
 import { ParseToValidIdStringPipe } from '../mongo/pipe/objectid.validation'
+import { TastelessException } from './exception/tasteless.exception'
 
 @Controller('pizzas')
 export class PizzaController {
@@ -28,10 +28,7 @@ export class PizzaController {
   @Roles('admin')
   @Post()
   async create(@Body() createPizzaDto: CreatePizzaDto) {
-    if (createPizzaDto.ingredients.length === 0)
-      throw new BadRequestException(
-        'Your pizza without ingredients is so tasteless!',
-      )
+    if (createPizzaDto.ingredients.length === 0) throw new TastelessException()
 
     return await this.pizzaService.create(createPizzaDto)
   }
@@ -60,10 +57,7 @@ export class PizzaController {
     @Param('id', ParseToValidIdStringPipe) id: string,
     @Body() updatePizzaDto: UpdatePizzaDto,
   ) {
-    if (updatePizzaDto.ingredients.length === 0)
-      throw new BadRequestException(
-        'Your pizza without ingredients is so tasteless!',
-      )
+    if (updatePizzaDto.ingredients.length === 0) throw new TastelessException()
 
     const updated = await this.pizzaService.update(id, updatePizzaDto)
 
