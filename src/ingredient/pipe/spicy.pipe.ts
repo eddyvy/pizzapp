@@ -1,8 +1,9 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common'
+import { IngredientType } from '../types/ingredient.types'
 
 @Injectable()
-export class SpicyParseToNumber implements PipeTransform {
-  transform(value: unknown): any {
+export class SpicyParseToNumberPipe implements PipeTransform {
+  transform(value: unknown): IngredientType {
     if (
       !value ||
       Array.isArray(value) ||
@@ -11,10 +12,8 @@ export class SpicyParseToNumber implements PipeTransform {
     )
       throw new BadRequestException()
 
-    const { spicyLevel, ...rest } = value as { spicyLevel: unknown } & Record<
-      string,
-      unknown
-    >
+    const { spicyLevel, ...rest } = value as IngredientType
+
     const n = Number(spicyLevel)
 
     if (isNaN(n))
@@ -33,6 +32,6 @@ export class SpicyParseToNumber implements PipeTransform {
     return {
       ...rest,
       spicyLevel: n,
-    }
+    } as IngredientType
   }
 }

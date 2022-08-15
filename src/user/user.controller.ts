@@ -16,7 +16,7 @@ import { JwtGuard, RolesGuard } from '../auth/guard'
 import { JwtPayload, Roles } from '../auth/decorator'
 import { CreateUserDto, UpdateUserDto } from './dto'
 import { UserService } from './user.service'
-import { ParseToValidIdString } from '../mongo/validation/objectid.validation'
+import { ParseToValidIdStringPipe } from '../mongo/pipe/objectid.validation'
 
 @UseGuards(JwtGuard, RolesGuard)
 @Controller('users')
@@ -42,7 +42,7 @@ export class UserController {
 
   @Roles('admin')
   @Get(':id')
-  async findOne(@Param('id', ParseToValidIdString) id: string) {
+  async findOne(@Param('id', ParseToValidIdStringPipe) id: string) {
     const user = await this.userService.findOne(id)
 
     if (!user) throw new NotFoundException()
@@ -53,7 +53,7 @@ export class UserController {
   @Roles('admin')
   @Patch(':id')
   async update(
-    @Param('id', ParseToValidIdString) id: string,
+    @Param('id', ParseToValidIdStringPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     if (
@@ -73,7 +73,7 @@ export class UserController {
 
   @Roles('admin')
   @Delete(':id')
-  async remove(@Param('id', ParseToValidIdString) id: string) {
+  async remove(@Param('id', ParseToValidIdStringPipe) id: string) {
     const deleted = await this.userService.remove(id)
 
     if (!deleted) throw new UnprocessableEntityException('User does not exist')

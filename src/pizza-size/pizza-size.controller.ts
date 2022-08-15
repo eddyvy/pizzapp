@@ -15,7 +15,7 @@ import { JwtGuard, RolesGuard } from '../auth/guard'
 import { Roles } from '../auth/decorator'
 import { CreatePizzaSizeDto, UpdatePizzaSizeDto } from './dto'
 import { PizzaSizeService } from './pizza-size.service'
-import { ParseToValidIdString } from '../mongo/validation/objectid.validation'
+import { ParseToValidIdStringPipe } from '../mongo/pipe/objectid.validation'
 
 @Controller('sizes')
 export class PizzaSizeController {
@@ -34,7 +34,7 @@ export class PizzaSizeController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseToValidIdString) id: string) {
+  async findOne(@Param('id', ParseToValidIdStringPipe) id: string) {
     const PizzaSize = await this.pizzaSizeService.findOne(id)
     if (!PizzaSize) throw new NotFoundException()
     return PizzaSize
@@ -44,7 +44,7 @@ export class PizzaSizeController {
   @Roles('admin')
   @Patch(':id')
   async update(
-    @Param('id', ParseToValidIdString) id: string,
+    @Param('id', ParseToValidIdStringPipe) id: string,
     @Body() updatePizzaSizeDto: UpdatePizzaSizeDto,
   ) {
     if (
@@ -66,7 +66,7 @@ export class PizzaSizeController {
   @UseGuards(JwtGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')
-  async remove(@Param('id', ParseToValidIdString) id: string) {
+  async remove(@Param('id', ParseToValidIdStringPipe) id: string) {
     const deleted = await this.pizzaSizeService.remove(id)
 
     if (!deleted)

@@ -14,8 +14,8 @@ import { JwtGuard, RolesGuard } from '../auth/guard'
 import { Roles } from '../auth/decorator'
 import { CreateIngredientDto, UpdateIngredientDto } from './dto'
 import { IngredientService } from './ingredient.service'
-import { ParseToValidIdString } from '../mongo/validation/objectid.validation'
-import { SpicyParseToNumber } from './validation/spicy.validation'
+import { ParseToValidIdStringPipe } from '../mongo/pipe/objectid.validation'
+import { SpicyParseToNumberPipe } from './pipe/spicy.pipe'
 
 @Controller('ingredients')
 export class IngredientController {
@@ -25,7 +25,7 @@ export class IngredientController {
   @Roles('admin')
   @Post()
   async create(
-    @Body(SpicyParseToNumber) createIngredientDto: CreateIngredientDto,
+    @Body(SpicyParseToNumberPipe) createIngredientDto: CreateIngredientDto,
   ) {
     return await this.ingredientService.create(createIngredientDto)
   }
@@ -36,7 +36,7 @@ export class IngredientController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseToValidIdString) id: string) {
+  async findOne(@Param('id', ParseToValidIdStringPipe) id: string) {
     const ingredient = await this.ingredientService.findOne(id)
     if (!ingredient) throw new NotFoundException()
     return ingredient
@@ -46,8 +46,8 @@ export class IngredientController {
   @Roles('admin')
   @Patch(':id')
   async update(
-    @Param('id', ParseToValidIdString) id: string,
-    @Body(SpicyParseToNumber) updateIngredientDto: UpdateIngredientDto,
+    @Param('id', ParseToValidIdStringPipe) id: string,
+    @Body(SpicyParseToNumberPipe) updateIngredientDto: UpdateIngredientDto,
   ) {
     const updated = await this.ingredientService.update(id, updateIngredientDto)
 
@@ -60,7 +60,7 @@ export class IngredientController {
   @UseGuards(JwtGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')
-  async remove(@Param('id', ParseToValidIdString) id: string) {
+  async remove(@Param('id', ParseToValidIdStringPipe) id: string) {
     const deleted = await this.ingredientService.remove(id)
 
     if (!deleted)
