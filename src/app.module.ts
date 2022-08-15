@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module'
 import { IngredientModule } from './ingredient/ingredient.module'
 import { PizzaSizeModule } from './pizza-size/pizza-size.module'
 import { PizzaModule } from './pizza/pizza.module'
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PizzaModule } from './pizza/pizza.module'
     IngredientModule,
     PizzaSizeModule,
     PizzaModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [

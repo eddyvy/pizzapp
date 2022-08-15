@@ -26,7 +26,7 @@ export class PizzaService {
     }
   }
 
-  private async getIngredientsFromNames(
+  public async getIngredientsFromNames(
     ingredientNames: string[],
     throwIfMissingSomething = true,
   ): Promise<IngredientDocument[]> {
@@ -77,6 +77,16 @@ export class PizzaService {
     return this.mapPizza(piz)
   }
 
+  async findByNameAsDb(nameToFind: string): Promise<PizzaDocument | null> {
+    const piz = await this.pizzaModel
+      .findOne({
+        name: nameToFind,
+      })
+      .populate(this.POPULATE_STR)
+    if (!piz) return null
+    return piz
+  }
+
   async findManyByIngredients(
     ingredientsToFind: string[],
   ): Promise<PizzaType[]> {
@@ -110,7 +120,7 @@ export class PizzaService {
 
     const updatePizzaMapped = ingredients
       ? { ...rest, ingredients: ingFromDb }
-      : UpdatePizzaDto
+      : updatePizzaDto
 
     const { acknowledged } = await this.pizzaModel.updateOne(
       { _id: piz._id },

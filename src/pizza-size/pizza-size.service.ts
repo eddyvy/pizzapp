@@ -23,8 +23,8 @@ export class PizzaSizeService {
 
   async create(createPizzaSizeDto: CreatePizzaSizeDto): Promise<PizzaSizeType> {
     const createdPizzaSize = new this.pizzaSizeModel(createPizzaSizeDto)
-    const ing = await createdPizzaSize.save()
-    return this.mapPizzaSize(ing)
+    const ps = await createdPizzaSize.save()
+    return this.mapPizzaSize(ps)
   }
 
   async findAll(): Promise<PizzaSizeType[]> {
@@ -44,6 +44,14 @@ export class PizzaSizeService {
     })
     if (!ps) return null
     return this.mapPizzaSize(ps)
+  }
+
+  async findByNameAsDb(nameToFind: string): Promise<PizzaSizeDocument | null> {
+    const ps = await this.pizzaSizeModel.findOne({
+      name: nameToFind,
+    })
+    if (!ps) return null
+    return ps
   }
 
   async findBySize(sizeToFind: number): Promise<PizzaSizeType | null> {
