@@ -1,13 +1,13 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { ObjectId } from 'bson'
+import { adminUser, notAdminUser } from '../../data'
 import {
   checkOrCreateUser,
   createToken,
   getModuleFixture,
   initApp,
 } from '../../helper'
-import { CreateUserDto } from '../../../src/user/dto'
 import { UserRole } from '../../../src/user/enum/user-role.enum'
 import { UserType } from '../../../src/user/types/user.types'
 import { UserModule } from '../../../src/user/user.module'
@@ -17,20 +17,6 @@ describe('DELETE /users/:id', () => {
   const url = '/users'
   let app: INestApplication
   let userService: UserService
-
-  const adminUser: CreateUserDto = {
-    email: 'test@admin.test',
-    name: 'testName',
-    password: 'testPass',
-    role: UserRole.ADMIN,
-  }
-
-  const notAdminUser: CreateUserDto = {
-    email: 'test@user.test',
-    name: 'testNameUser',
-    password: 'testPass',
-    role: UserRole.USER,
-  }
 
   beforeAll(async () => {
     const moduleFixture = await getModuleFixture()

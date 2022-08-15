@@ -1,19 +1,12 @@
 import { INestApplication } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import * as request from 'supertest'
+import { adminUser } from '../../data'
 import { checkOrCreateUser, getModuleFixture, initApp } from '../../helper'
-import { CreateUserDto } from '../../../src/user/dto'
-import { UserRole } from '../../../src/user/enum/user-role.enum'
 
 describe('POST /auth/login', () => {
   const url = '/auth/login'
   let app: INestApplication
-  const adminUser: CreateUserDto = {
-    email: 'test@admin.test',
-    name: 'testName',
-    password: 'testPass',
-    role: UserRole.ADMIN,
-  }
 
   beforeAll(async () => {
     const moduleFixture = await getModuleFixture()
