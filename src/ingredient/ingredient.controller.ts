@@ -16,6 +16,7 @@ import { Roles } from '../auth/decorator'
 import { CreateIngredientDto, UpdateIngredientDto } from './dto'
 import { IngredientService } from './ingredient.service'
 import { ParseToValidIdString } from '../mongo/validation/objectid.validation'
+import { SpicyParseToNumber } from './validation/spicy.validation'
 
 @Controller('ingredients')
 export class IngredientController {
@@ -24,7 +25,9 @@ export class IngredientController {
   @UseGuards(JwtGuard, RolesGuard)
   @Roles('admin')
   @Post()
-  async create(@Body() createIngredientDto: CreateIngredientDto) {
+  async create(
+    @Body(SpicyParseToNumber) createIngredientDto: CreateIngredientDto,
+  ) {
     return await this.ingredientService.create(createIngredientDto)
   }
 
@@ -45,7 +48,7 @@ export class IngredientController {
   @Patch(':id')
   async update(
     @Param('id', ParseToValidIdString) id: string,
-    @Body() updateIngredientDto: UpdateIngredientDto,
+    @Body(SpicyParseToNumber) updateIngredientDto: UpdateIngredientDto,
   ) {
     if (
       !updateIngredientDto ||

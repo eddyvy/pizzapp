@@ -48,7 +48,7 @@ export class IngredientService {
 
   async findByName(nameToFind: string): Promise<IngredientType | null> {
     const ing = await this.ingredientModel.findOne({
-      nameToFind,
+      name: nameToFind,
     })
     if (!ing) return null
     return this.mapIngredient(ing)
