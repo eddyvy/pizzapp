@@ -1,11 +1,12 @@
 import { INestApplication } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import * as request from 'supertest'
-import { checkOrCreateUser, getModuleFixture, initApp } from '../helper'
-import { CreateUserDto } from '../../src/user/dto'
-import { UserRole } from '../../src/user/enum/user-role.enum'
+import { checkOrCreateUser, getModuleFixture, initApp } from '../../helper'
+import { CreateUserDto } from '../../../src/user/dto'
+import { UserRole } from '../../../src/user/enum/user-role.enum'
 
-describe('AppController (e2e)', () => {
+describe('POST /auth/login', () => {
+  const url = '/auth/login'
   let app: INestApplication
   const adminUser: CreateUserDto = {
     email: 'test@admin.test',
@@ -24,9 +25,9 @@ describe('AppController (e2e)', () => {
     await app.close()
   })
 
-  test('POST /auth/login should return 201 with a correct token if correct credentials', async () => {
+  test('should return 201 with a correct token if correct credentials', async () => {
     await request(app.getHttpServer())
-      .post('/auth/login')
+      .post(url)
       .send({
         email: 'test@admin.test',
         password: 'testPass',
@@ -51,9 +52,9 @@ describe('AppController (e2e)', () => {
       })
   })
 
-  test('POST /auth/login should return 401 if incorrect credentials', async () => {
+  test('should return 401 if incorrect credentials', async () => {
     await request(app.getHttpServer())
-      .post('/auth/login')
+      .post(url)
       .send({
         email: 'wrong@admin.test',
         password: 'testPass',
@@ -61,7 +62,7 @@ describe('AppController (e2e)', () => {
       .expect(401)
 
     await request(app.getHttpServer())
-      .post('/auth/login')
+      .post(url)
       .send({
         email: 'test@admin.test',
         password: 'wrong',
@@ -69,9 +70,9 @@ describe('AppController (e2e)', () => {
       .expect(401)
   })
 
-  test('POST /auth/login should return 400 if incorrect request body', async () => {
+  test('should return 400 if incorrect wrong request body', async () => {
     await request(app.getHttpServer())
-      .post('/auth/login')
+      .post(url)
       .send({
         email: 'wrong',
         password: 'testPass',
@@ -84,7 +85,7 @@ describe('AppController (e2e)', () => {
       })
 
     await request(app.getHttpServer())
-      .post('/auth/login')
+      .post(url)
       .send({
         email: 'wrong',
       })
@@ -100,7 +101,7 @@ describe('AppController (e2e)', () => {
       })
 
     await request(app.getHttpServer())
-      .post('/auth/login')
+      .post(url)
       .send({
         password: {
           wrong: 'data',
