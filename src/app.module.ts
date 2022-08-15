@@ -8,6 +8,7 @@ import { AppService } from './app.service'
 import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module'
 import { IngredientModule } from './ingredient/ingredient.module'
+import { PizzaSizeModule } from './pizza-size/pizza-size.module'
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { IngredientModule } from './ingredient/ingredient.module'
     }),
     UserModule,
     IngredientModule,
+    PizzaSizeModule,
   ],
   controllers: [AppController],
   providers: [

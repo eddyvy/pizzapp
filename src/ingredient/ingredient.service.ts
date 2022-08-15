@@ -12,7 +12,7 @@ export class IngredientService {
     private ingredientModel: Model<IngredientDocument>,
   ) {}
 
-  private mapIngredient(ing: IngredientDocument) {
+  private mapIngredient(ing: IngredientDocument): IngredientType {
     return {
       id: ing._id.toString(),
       name: ing.name,
