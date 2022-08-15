@@ -28,7 +28,7 @@ export class IngredientController {
   async create(
     @Body(SpicyParseToNumberPipe) createIngredientDto: CreateIngredientDto,
   ) {
-    if (createIngredientDto.name.toLocaleLowerCase() === 'pineapple')
+    if (createIngredientDto.name.toLowerCase() === 'pineapple')
       throw new PinneappleException()
 
     return await this.ingredientService.create(createIngredientDto)
@@ -53,7 +53,10 @@ export class IngredientController {
     @Param('id', ParseToValidIdStringPipe) id: string,
     @Body(SpicyParseToNumberPipe) updateIngredientDto: UpdateIngredientDto,
   ) {
-    if (updateIngredientDto.name.toLocaleLowerCase() === 'pineapple')
+    if (
+      updateIngredientDto.name &&
+      updateIngredientDto.name.toLowerCase() === 'pineapple'
+    )
       throw new PinneappleException()
 
     const updated = await this.ingredientService.update(id, updateIngredientDto)

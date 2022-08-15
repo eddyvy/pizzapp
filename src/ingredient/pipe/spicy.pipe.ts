@@ -14,6 +14,8 @@ export class SpicyParseToNumberPipe implements PipeTransform {
 
     const { spicyLevel, ...rest } = value as IngredientType
 
+    if (spicyLevel === undefined) return value as IngredientType
+
     const n = Number(spicyLevel)
 
     if (isNaN(n))

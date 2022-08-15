@@ -284,4 +284,39 @@ describe('PATCH /ingredients/:id', () => {
         error: 'Unprocessable Entity',
       })
   })
+
+  test('should return 418 if you try to add pineapple', async () => {
+    const now = Date.now().valueOf()
+    const me: UserType = await userService.findByEmailAndPassword(
+      adminUser.email,
+      adminUser.password,
+    )
+    const myToken = createToken(me)
+
+    const ingredientToUpdate = await ingredientService.create({
+      name: `ingredient${now}`,
+      isGlutenFree: true,
+      isNutFree: true,
+      isLactoseFree: true,
+      isFishFree: true,
+      isVegetarian: true,
+      isVegan: true,
+      spicyLevel: 0,
+      extraPrice: 1.5,
+    })
+
+    await request(app.getHttpServer())
+      .patch(`${url}/${ingredientToUpdate.id}`)
+      .set('Authorization', `Bearer ${myToken}`)
+      .send({
+        name: 'pineapple',
+      })
+      // .expect(418)
+      .expect({
+        statusCode: 418,
+        message:
+          'Pineapples are bad, pineapples are not your friend in a pizza!',
+        error: "I'm a teapot",
+      })
+  })
 })
