@@ -9,6 +9,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common'
 import { JwtGuard, RolesGuard } from '../auth/guard'
 import { Roles } from '../auth/decorator'
@@ -46,6 +47,14 @@ export class PizzaSizeController {
     @Param('id', ParseToValidIdString) id: string,
     @Body() updatePizzaSizeDto: UpdatePizzaSizeDto,
   ) {
+    if (
+      !updatePizzaSizeDto ||
+      Array.isArray(updatePizzaSizeDto) ||
+      typeof updatePizzaSizeDto !== 'object' ||
+      Object.keys(updatePizzaSizeDto).length === 0
+    )
+      throw new BadRequestException()
+
     const updated = await this.pizzaSizeService.update(id, updatePizzaSizeDto)
 
     if (!updated)
