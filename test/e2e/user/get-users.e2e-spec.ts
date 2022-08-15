@@ -46,7 +46,7 @@ describe('POST /users', () => {
     await app.close()
   })
 
-  test('should return 200 all users with correct information', async () => {
+  test('should return 200 with all users and their correct information', async () => {
     const me: UserType = await userService.findByEmailAndPassword(
       adminUser.email,
       adminUser.password,

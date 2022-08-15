@@ -9,7 +9,6 @@ import {
   NotFoundException,
   UnprocessableEntityException,
   UseGuards,
-  BadRequestException,
 } from '@nestjs/common'
 import { JwtGuard, RolesGuard } from '../auth/guard'
 import { Roles } from '../auth/decorator'
@@ -50,14 +49,6 @@ export class IngredientController {
     @Param('id', ParseToValidIdString) id: string,
     @Body(SpicyParseToNumber) updateIngredientDto: UpdateIngredientDto,
   ) {
-    if (
-      !updateIngredientDto ||
-      Array.isArray(updateIngredientDto) ||
-      typeof updateIngredientDto !== 'object' ||
-      Object.keys(updateIngredientDto).length === 0
-    )
-      throw new BadRequestException()
-
     const updated = await this.ingredientService.update(id, updateIngredientDto)
 
     if (!updated)

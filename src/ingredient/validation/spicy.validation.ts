@@ -3,6 +3,14 @@ import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common'
 @Injectable()
 export class SpicyParseToNumber implements PipeTransform {
   transform(value: unknown): any {
+    if (
+      !value ||
+      Array.isArray(value) ||
+      typeof value !== 'object' ||
+      Object.keys(value).length === 0
+    )
+      throw new BadRequestException()
+
     const { spicyLevel, ...rest } = value as { spicyLevel: unknown } & Record<
       string,
       unknown

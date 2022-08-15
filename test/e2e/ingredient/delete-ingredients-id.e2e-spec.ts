@@ -12,11 +12,14 @@ import { UserRole } from '../../../src/user/enum/user-role.enum'
 import { UserType } from '../../../src/user/types/user.types'
 import { UserModule } from '../../../src/user/user.module'
 import { UserService } from '../../../src/user/user.service'
+import { IngredientModule } from '../../../src/ingredient/ingredient.module'
+import { IngredientService } from '../../../src/ingredient/ingredient.service'
 
-describe('DELETE /users/:id', () => {
-  const url = '/users'
+describe('DELETE /ingredients/:id', () => {
+  const url = '/ingredients'
   let app: INestApplication
   let userService: UserService
+  let ingredientService: IngredientService
 
   const adminUser: CreateUserDto = {
     email: 'test@admin.test',
@@ -37,6 +40,9 @@ describe('DELETE /users/:id', () => {
     await checkOrCreateUser(moduleFixture, adminUser)
     await checkOrCreateUser(moduleFixture, notAdminUser)
 
+    ingredientService = moduleFixture
+      .select(IngredientModule)
+      .get(IngredientService)
     userService = moduleFixture.select(UserModule).get(UserService)
     app = await initApp(moduleFixture)
   })
@@ -53,24 +59,31 @@ describe('DELETE /users/:id', () => {
     )
     const myToken = createToken(me)
 
-    const userToDelete = await userService.create({
-      name: `user${now}`,
-      email: `user${now}@mail.test`,
-      password: 'pass',
-      role: UserRole.USER,
+    const ingredientToDelete = await ingredientService.create({
+      name: `ingredient${now}`,
+      isGlutenFree: true,
+      isNutFree: true,
+      isLactoseFree: true,
+      isFishFree: true,
+      isVegetarian: true,
+      isVegan: true,
+      spicyLevel: 0,
+      extraPrice: 1.5,
     })
 
     await request(app.getHttpServer())
-      .delete(`${url}/${userToDelete.id}`)
+      .delete(`${url}/${ingredientToDelete.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .expect(200)
       .expect({
         success: true,
       })
 
-    const deletedUser = await userService.findOne(userToDelete.id)
+    const deletedIngredient = await ingredientService.findOne(
+      ingredientToDelete.id,
+    )
 
-    expect(deletedUser).toBeNull()
+    expect(deletedIngredient).toBeNull()
   })
 
   test('should return 400 with with wrong id param', async () => {
@@ -99,15 +112,20 @@ describe('DELETE /users/:id', () => {
     )
     const myToken = createToken(me)
 
-    const userToDelete = await userService.create({
-      name: `user${now}`,
-      email: `user${now}@mail.test`,
-      password: 'pass',
-      role: UserRole.USER,
+    const ingredientToDelete = await ingredientService.create({
+      name: `ingredient${now}`,
+      isGlutenFree: true,
+      isNutFree: true,
+      isLactoseFree: true,
+      isFishFree: true,
+      isVegetarian: true,
+      isVegan: true,
+      spicyLevel: 0,
+      extraPrice: 1.5,
     })
 
     await request(app.getHttpServer())
-      .delete(`${url}/${userToDelete.id}`)
+      .delete(`${url}/${ingredientToDelete.id}`)
       .set('Authorization', `Bearer ${myToken}`)
       .expect(403)
       .expect({
@@ -117,7 +135,7 @@ describe('DELETE /users/:id', () => {
       })
   })
 
-  test('should return 422 if the user does not exist', async () => {
+  test('should return 422 if the ingredient does not exist', async () => {
     const me: UserType = await userService.findByEmailAndPassword(
       adminUser.email,
       adminUser.password,
@@ -132,7 +150,7 @@ describe('DELETE /users/:id', () => {
       .expect(422)
       .expect({
         statusCode: 422,
-        message: 'User does not exist',
+        message: 'Ingredient does not exist',
         error: 'Unprocessable Entity',
       })
   })
